@@ -21,8 +21,8 @@ class BaseLogObject(object):
 
     def format_request(self):
         meta_keys = ['PATH_INFO', 'HTTP_X_SCHEME', 'REMOTE_ADDR',
-                     'TZ', 'REMOTE_HOST', 'CONTENT_TYPE', 'CONTENT_LENGTH', 'HTTP_AUTHORIZATION',
-                     'HTTP_HOST', 'HTTP_USER_AGENT', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', ' HTTP_X_REQUEST_ID']
+                     'TZ', 'REMOTE_HOST', 'CONTENT_TYPE', 'CONTENT_LENGTH',
+                     'HTTP_USER_AGENT', 'HTTP_X_REAL_IP', ' HTTP_X_REQUEST_ID']
         result = dict(
             method=self.request.method,
             meta={key.lower(): str(value) for key, value in self.request.META.items() if key in meta_keys},
@@ -32,12 +32,12 @@ class BaseLogObject(object):
         result['scheme'] = getattr(self.request, 'scheme', None)
 
         try:
-            result['data'] = {key: value for key, value in self.request.data.items()}
+            result['data'] = str(self.request.data)
         except AttributeError:
             if self.request.method == 'GET':
-                result['data'] = self.request.GET.dict()
+                result['data'] = str(self.request.GET.dict())
             elif self.request.method == 'POST':
-                result['data'] = self.request.POST.dict()
+                result['data'] = str(self.request.POST.dict())
 
         try:
             result['user'] = str(self.request.user)
@@ -99,6 +99,12 @@ class LogObject(BaseLogObject):
         for field in result.copy().keys():
             if field not in settings.RESPONSE_FIELDS:
                 del result[field]
+
+        try:
+            result['data'] = str(self.response.data)
+        except AttributeError:
+            result['data'] = None
+
         return result
 
 
