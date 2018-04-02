@@ -58,7 +58,7 @@ def __send_to_es(timestamp, level, message):
         try:
             message = json.loads(message).get(level).get(str(timestamp))
             conn.index(
-                index="{}".format(index),
+                index="{}-{}".format(index, datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')),
                 doc_type="log_objects",
                 body={
                     "date": datetime.datetime.fromtimestamp(timestamp).isoformat(),
