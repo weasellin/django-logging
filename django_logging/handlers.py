@@ -40,10 +40,10 @@ def __send_to_es(timestamp, level, message):
     index = settings.ELASTICSEARCH_INDEX
     if settings.ELASTICSEARCH_ENABLED:
         if settings.ELASTICSEARCH_AWS_HOST:
-            auth = AWSRequestsAuth(aws_access_key=ELASTICSEARCH_AWS_ACCESS_KEY,
-                                   aws_secret_access_key=ELASTICSEARCH_AWS_SECRET,
-                                   aws_host=ELASTICSEARCH_AWS_HOST,
-                                   aws_region=ELASTICSEARCH_AWS_REGION,
+            auth = AWSRequestsAuth(aws_access_key=settings.ELASTICSEARCH_AWS_ACCESS_KEY,
+                                   aws_secret_access_key=settings.ELASTICSEARCH_AWS_SECRET,
+                                   aws_host=settings.ELASTICSEARCH_AWS_HOST,
+                                   aws_region=settings.ELASTICSEARCH_AWS_REGION,
                                    aws_service='es')
             conn = Elasticsearch(host=es_host,
                                  use_ssl=settings.ELASTICSEARCH_SSL,
