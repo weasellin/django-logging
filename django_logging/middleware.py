@@ -21,8 +21,8 @@ class DjangoLoggingMiddleware(MiddlewareMixin):
         if request.path_info.startswith(tuple(settings.IGNORED_PATHS)):
             return response
 
-        if response.status_code == 500:
-            return response
+        if response.status_code >= 500:
+            log.error(LogObject(request, response, duration))
         elif 400 <= response.status_code < 500:
             log.warning(LogObject(request, response, duration))
         else:
