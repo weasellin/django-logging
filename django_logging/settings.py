@@ -26,7 +26,11 @@ class DjangoLoggingSettings(object):
             ELASTICSEARCH_SSL=False,
             ELASTICSEARCH_HOSTS=["localhost"],
             ELASTICSEARCH_INDEX="django-logging-json",
-            ELASTICSEARCH_AUTH=None
+            ELASTICSEARCH_AUTH=None,
+            ELASTICSEARCH_AWS_HOST=False,
+            ELASTICSEARCH_AWS_ACCESS_KEY=None,
+            ELASTICSEARCH_AWS_SECRET=None,
+            ELASTICSEARCH_AWS_REGION=None,
         )
 
         try:
@@ -61,6 +65,6 @@ class DjangoLoggingSettings(object):
 
     def __getattr__(self, name):
         return self.__settings.get(name)
-            
+
 
 sys.modules[__name__] = DjangoLoggingSettings()

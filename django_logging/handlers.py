@@ -10,7 +10,8 @@ import certifi
 
 from . import settings
 from .log_object import LogObject, ErrorLogObject, SqlLogObject
-from elasticsearch import Elasticsearch
+from aws_requests_auth.aws_auth import AWSRequestsAuth
+from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import ConnectionError
 
 
@@ -38,11 +39,22 @@ def send_to_elasticsearch(timestamp, level, message):
 def __send_to_es(timestamp, level, message):
     index = settings.ELASTICSEARCH_INDEX
     if settings.ELASTICSEARCH_ENABLED:
-        conn = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS,
-                             use_ssl=settings.ELASTICSEARCH_SSL,
-                             http_auth=settings.ELASTICSEARCH_AUTH,
-                             verify_certs=settings.ELASTICSEARCH_SSL,
-                             ca_certs=certifi.where())
+        if settings.ELASTICSEARCH_AWS_HOST:
+            auth = AWSRequestsAuth(aws_access_key=ELASTICSEARCH_AWS_ACCESS_KEY,
+                                   aws_secret_access_key=ELASTICSEARCH_AWS_SECRET,
+                                   aws_host=ELASTICSEARCH_AWS_HOST,
+                                   aws_region=ELASTICSEARCH_AWS_REGION,
+                                   aws_service='es')
+            conn = Elasticsearch(host=es_host,
+                                 use_ssl=settings.ELASTICSEARCH_SSL,
+                                 connection_class=RequestsHttpConnection,
+                                 http_auth=auth)
+        else:
+            conn = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS,
+                                 use_ssl=settings.ELASTICSEARCH_SSL,
+                                 http_auth=settings.ELASTICSEARCH_AUTH,
+                                 verify_certs=settings.ELASTICSEARCH_SSL,
+                                 ca_certs=certifi.where())
         try:
             message = json.loads(message).get(level).get(str(timestamp))
             conn.index(
