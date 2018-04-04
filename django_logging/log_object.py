@@ -29,21 +29,6 @@ class BaseLogObject(object):
             path=self.request.path_info,
         )
 
-        result['scheme'] = getattr(self.request, 'scheme', None)
-
-        try:
-            result['data'] = str(self.request.data)
-        except AttributeError:
-            if self.request.method == 'GET':
-                result['data'] = str(self.request.GET.dict())
-            elif self.request.method == 'POST':
-                result['data'] = str(self.request.POST.dict())
-
-        try:
-            result['user'] = str(self.request.user)
-        except AttributeError:
-            result['user'] = None
-
         return result
 
 
