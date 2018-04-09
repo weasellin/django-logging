@@ -28,8 +28,6 @@ class DjangoLoggingSettings(object):
             ELASTICSEARCH_INDEX="django-logging-json",
             ELASTICSEARCH_AUTH=None,
             ELASTICSEARCH_AWS_HOST=False,
-            ELASTICSEARCH_AWS_ACCESS_KEY=None,
-            ELASTICSEARCH_AWS_SECRET=None,
             ELASTICSEARCH_AWS_REGION=None,
         )
 

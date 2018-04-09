@@ -10,7 +10,7 @@ import certifi
 
 from . import settings
 from .log_object import LogObject, ErrorLogObject, SqlLogObject
-from aws_requests_auth.aws_auth import AWSRequestsAuth
+from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import ConnectionError
 
@@ -40,13 +40,10 @@ def __send_to_es(timestamp, level, message):
     index = settings.ELASTICSEARCH_INDEX
     if settings.ELASTICSEARCH_ENABLED:
         if settings.ELASTICSEARCH_AWS_HOST:
-            auth = AWSRequestsAuth(aws_access_key=settings.ELASTICSEARCH_AWS_ACCESS_KEY,
-                                   aws_secret_access_key=settings.ELASTICSEARCH_AWS_SECRET,
-                                   aws_host=settings.ELASTICSEARCH_AWS_HOST,
-                                   aws_region=settings.ELASTICSEARCH_AWS_REGION,
-                                   aws_service='es')
+            auth = BotoAWSRequestsAuth(aws_host=settings.ELASTICSEARCH_AWS_HOST,
+                                       aws_region=settings.ELASTICSEARCH_AWS_REGION,
+                                       aws_service='es')
             conn = Elasticsearch(host=settings.ELASTICSEARCH_AWS_HOST,
-                                 use_ssl=settings.ELASTICSEARCH_SSL,
                                  connection_class=RequestsHttpConnection,
                                  http_auth=auth)
         else:
