@@ -45,6 +45,7 @@ def __send_to_es(timestamp, level, message):
                                        aws_service='es')
             conn = Elasticsearch(host=settings.ELASTICSEARCH_AWS_HOST,
                                  connection_class=RequestsHttpConnection,
+                                 port=80,
                                  http_auth=auth)
         else:
             conn = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS,
