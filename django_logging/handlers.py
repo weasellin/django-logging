@@ -14,6 +14,26 @@ from aws_requests_auth.boto_utils import BotoAWSRequestsAuth
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from elasticsearch.exceptions import ConnectionError
 
+def _get_es_conn():
+    conn = None
+    if settings.ELASTICSEARCH_AWS_HOST:
+        auth = BotoAWSRequestsAuth(aws_host=settings.ELASTICSEARCH_AWS_HOST,
+                                   aws_region=settings.ELASTICSEARCH_AWS_REGION,
+                                   aws_service='es')
+        conn = Elasticsearch(host=settings.ELASTICSEARCH_AWS_HOST,
+                             connection_class=RequestsHttpConnection,
+                             port=80,
+                             http_auth=auth)
+    else:
+        conn = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS,
+                             use_ssl=settings.ELASTICSEARCH_SSL,
+                             http_auth=settings.ELASTICSEARCH_AUTH,
+                             verify_certs=settings.ELASTICSEARCH_SSL,
+                             ca_certs=certifi.where())
+    return conn
+
+ES_CONNECTION = _get_es_conn()
+
 
 def message_from_record(record):
     if isinstance(record.msg, dict) or isinstance(record.msg, str):
@@ -39,21 +59,8 @@ def send_to_elasticsearch(timestamp, level, message):
 def __send_to_es(timestamp, level, message):
     index = settings.ELASTICSEARCH_INDEX
     if settings.ELASTICSEARCH_ENABLED:
-        if settings.ELASTICSEARCH_AWS_HOST:
-            auth = BotoAWSRequestsAuth(aws_host=settings.ELASTICSEARCH_AWS_HOST,
-                                       aws_region=settings.ELASTICSEARCH_AWS_REGION,
-                                       aws_service='es')
-            conn = Elasticsearch(host=settings.ELASTICSEARCH_AWS_HOST,
-                                 connection_class=RequestsHttpConnection,
-                                 port=80,
-                                 http_auth=auth)
-        else:
-            conn = Elasticsearch(hosts=settings.ELASTICSEARCH_HOSTS,
-                                 use_ssl=settings.ELASTICSEARCH_SSL,
-                                 http_auth=settings.ELASTICSEARCH_AUTH,
-                                 verify_certs=settings.ELASTICSEARCH_SSL,
-                                 ca_certs=certifi.where())
         try:
+            conn = ES_CONNECTION
             message = json.loads(message).get(level).get(str(timestamp))
             conn.index(
                 index="{}-{}".format(index, datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')),
